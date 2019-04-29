@@ -16,8 +16,10 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1.h"
+#include "TH2.h"
 #include "TLegend.h"
 #include "TCanvas.h"
+#include "TStyle.h"
 
 void plotter::Init(){
   if(js.empty()){
@@ -34,6 +36,7 @@ void plotter::Init(){
   c.height = js["Canvas"]["height"];
   c.width = js["Canvas"]["width"];
   c.title = js["Canvas"]["title"];
+  c.histclass = js["Canvas"]["class"];
 
 
   // set hist collection
@@ -47,20 +50,21 @@ void plotter::Init(){
     histo.varname = js_temp["var"];
     histo.selection = js_temp["selection"];
 
-    histo.marker_style.style = js_temp["marker"]["style"];
-    histo.marker_style.color = js_temp["marker"]["color"];
-    histo.marker_style.size = js_temp["marker"]["size"];
+    if(c.histclass == "TH1"){
+      histo.marker_style.style = js_temp["marker"]["style"];
+      histo.marker_style.color = js_temp["marker"]["color"];
+      histo.marker_style.size = js_temp["marker"]["size"];
 
-    histo.line_style.style = js_temp["line"]["style"];
-    histo.line_style.color = js_temp["line"]["color"];
-    histo.line_style.width = js_temp["line"]["width"];
+      histo.line_style.style = js_temp["line"]["style"];
+      histo.line_style.color = js_temp["line"]["color"];
+      histo.line_style.width = js_temp["line"]["width"];
+    }
 
     histo.norm = js_temp["opt"]["norm"];
     histo.drawopt = js_temp["opt"]["drawopt"];
-
     h.push_back(histo);
   }
-
+  std::cout << "Plotting class: " << c.histclass << std::endl;
   std::cout << "number of hists: " << h.size() << std::endl;
 
 
@@ -70,7 +74,11 @@ void plotter::Init(){
   sc.x_max = js["Scale"]["x_range"][1];
   sc.y_min = js["Scale"]["y_range"][0];
   sc.y_max = js["Scale"]["y_range"][1];
-  sc.nbins = js["Scale"]["nbins"];
+  sc.xbins = js["Scale"]["xbins"];
+
+  if(c.histclass == "TH2"){
+    sc.ybins = js["Scale"]["ybins"];
+  }
 
   // set title
   note.h_title = js["Annotation"]["title"]["hist"];
@@ -91,26 +99,77 @@ void plotter::Exec(){
 
   TCanvas* ca = new TCanvas("ca", c.title.c_str(), c.height, c.width);
 
-  std::vector<TH1F*> hv;
+
+  std::vector<TH1F*> hv1;
+  std::vector<TH2F*> hv2;
 
   for(int i=0; i<h.size(); i++){
     TFile* f = new TFile(h[i].filename.c_str(), "READ");
     TTree* tr = (TTree*) f->Get(h[i].treename.c_str());
 
     TString hn = Form("h%d", i);
-    tr->Draw(Form("%s>>%s(%d,%f,%f)", h[i].varname.c_str(), hn.Data(), sc.nbins, sc.x_min, sc.x_max), h[i].selection.c_str(), "");
 
-    TH1F* h_temp = (TH1F*)gDirectory->Get(hn.Data());
+    if(c.histclass == "TH1"){
+      tr->Draw(Form("%s>>%s(%d,%f,%f)", h[i].varname.c_str(), hn.Data(), sc.xbins, sc.x_min, sc.x_max), h[i].selection.c_str(), "");
+    }
+    else if(c.histclass == "TH2"){
+      std::string varname = h[i].varname;
+      auto pos = varname.find(':');
+      std::string var1 = varname.substr(0,pos);
+      std::string var2 = varname.substr(pos+1, varname.size());
+      note.x_title = var2;
+      note.y_title = var1;
 
-    h_temp->SetLineColor(h[i].line_style.color);
-    h_temp->GetYaxis()->SetRangeUser(sc.y_min, sc.y_max);
 
-    hv.push_back(h_temp);
+      tr->Draw(Form("%s:%s>>%s(%d,%f,%f,%d,%f,%f)", var1.c_str(), var2.c_str(), hn.Data(), sc.xbins, sc.x_min, sc.x_max, sc.ybins, sc.y_min, sc.y_max), h[i].selection.c_str(), "");
+    }
+    else{
+      std::cout << "Wrong plotting class!" << std::endl;
+      exit(1);
+    }
+
+    if(c.histclass=="TH1"){
+      TH1F* h_temp = (TH1F*)gDirectory->Get(hn.Data());
+      h_temp->SetLineColor(h[i].line_style.color);
+      h_temp->GetYaxis()->SetRangeUser(sc.y_min, sc.y_max);
+      h_temp->SetTitle(Form("%s;%s;%s", note.h_title.c_str(), note.x_title.c_str(), note.y_title.c_str()));
+      if(h[i].norm == true){
+        h_temp->Scale(1./h_temp->Integral());
+        h_temp->SetTitle(Form("%s;%s;%s", note.h_title.c_str(), note.x_title.c_str(), "Probability"));
+      }
+
+      hv1.push_back(h_temp);
+    }
+    else if(c.histclass=="TH2"){
+      TH2F* h_temp = (TH2F*)gDirectory->Get(hn.Data());
+      h_temp->GetXaxis()->SetTitle(note.x_title.c_str());
+      h_temp->GetYaxis()->SetTitle(note.y_title.c_str());
+
+      if(h[i].norm == true){
+        h_temp->Scale(1./h_temp->Integral());
+      }
+      hv2.push_back(h_temp);
+    }
+
+
   }
 
+  ca->cd();
+  ca->Clear();
+  gStyle->SetOptStat(0);
   for(int i=0; i<h.size(); i++){
-    ca->cd();
-    hv[i]->Draw(Form("%ssame",h[i].drawopt.c_str()));
+    if(c.histclass=="TH1"){
+      if(sc.log == true){
+        gPad->SetLogy();
+      }
+      hv1[i]->Draw(Form("%ssame",h[i].drawopt.c_str()));
+    }
+    else if(c.histclass=="TH2"){
+      if(sc.log == true){
+        gPad->SetLogz();
+      }
+      hv2[i]->Draw(Form("%s",h[i].drawopt.c_str()));
+    }
   }
 
 

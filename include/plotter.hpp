@@ -10,6 +10,7 @@ struct canvas{
   int height;
   int width;
   std::string title;
+  std::string histclass;
 };
 
 struct marker{
@@ -43,7 +44,8 @@ struct scale{
   float x_max;
   float y_min;
   float y_max;
-  int nbins;
+  int xbins;
+  int ybins;
 };
 
 struct legend{

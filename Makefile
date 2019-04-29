@@ -7,7 +7,7 @@ CPPFLAG=-I$(INC)
 
 ROOTFLAG=`root-config --cflags --libs`
 
-all: test TH1Plotter
+all: runPlotter
 
 test: $(SRC)/test.cpp
 	$(CXX) $(CXXFLAGS) -o $@ $< $(CPPFLAG)
@@ -15,7 +15,7 @@ test: $(SRC)/test.cpp
 plotter.o: $(SRC)/plotter.cpp
 	$(CXX) $(CXXFLAGS) -c -o $@ $< $(CPPFLAG) $(ROOTFLAG)
 
-TH1Plotter: $(SRC)/TH1Plotter.cpp plotter.o
+runPlotter: $(SRC)/runPlotter.cpp plotter.o
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(CPPFLAG) $(ROOTFLAG)
 
 .PHONY:
@@ -24,4 +24,4 @@ TH1Plotter: $(SRC)/TH1Plotter.cpp plotter.o
 
 clean:
 	rm -f test
-	rm -f TH1Plotter
+	rm -f runPlotter
