@@ -40,12 +40,14 @@ struct hist{
 
 struct scale{
   bool log;
-  float x_min;
-  float x_max;
-  float y_min;
-  float y_max;
+  double x_min;
+  double x_max;
+  double y_min;
+  double y_max;
   int xbins;
   int ybins;
+  double z_min;
+  double z_max;
 };
 
 struct legend{

@@ -76,8 +76,15 @@ void plotter::Init(){
   sc.y_max = js["Scale"]["y_range"][1];
   sc.xbins = js["Scale"]["xbins"];
 
+  std::cout << "Scale:" << std::endl;
+  std::cout << "x: [" << sc.x_min << ", " << sc.x_max << "]" << std::endl;
+  std::cout << "y: [" << sc.y_min << ", " << sc.y_max << "]" << std::endl;
+
   if(c.histclass == "TH2"){
     sc.ybins = js["Scale"]["ybins"];
+    sc.z_min = js["Scale"]["z_range"][0];
+    sc.z_max = js["Scale"]["z_range"][1];
+    std::cout << "z: [" << sc.z_min << ", " << sc.z_max << "]" << std::endl;
   }
 
   // set title
@@ -137,21 +144,20 @@ void plotter::Exec(){
         h_temp->Scale(1./h_temp->Integral());
         h_temp->SetTitle(Form("%s;%s;%s", note.h_title.c_str(), note.x_title.c_str(), "Probability"));
       }
-
       hv1.push_back(h_temp);
     }
+
     else if(c.histclass=="TH2"){
       TH2F* h_temp = (TH2F*)gDirectory->Get(hn.Data());
       h_temp->GetXaxis()->SetTitle(note.x_title.c_str());
       h_temp->GetYaxis()->SetTitle(note.y_title.c_str());
+
 
       if(h[i].norm == true){
         h_temp->Scale(1./h_temp->Integral());
       }
       hv2.push_back(h_temp);
     }
-
-
   }
 
   ca->cd();
@@ -168,6 +174,8 @@ void plotter::Exec(){
       if(sc.log == true){
         gPad->SetLogz();
       }
+      hv2[i]->SetMinimum(sc.z_min);
+      hv2[i]->SetMaximum(sc.z_max);
       hv2[i]->Draw(Form("%s",h[i].drawopt.c_str()));
     }
   }
