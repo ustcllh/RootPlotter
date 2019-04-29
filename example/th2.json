@@ -1,0 +1,45 @@
+{
+  "Canvas": {
+    "name": "test",
+    "height": 800,
+    "width": 600,
+    "title": "canvas title",
+    "class": "TH2"
+  },
+
+  "Hist": [
+    {
+      "file": "/Users/liulihan/Documents/PU14Decoder/plots/PythiaEventsTune14PtHat120/plain_btree.root",
+      "tree": "JetBinaryTree",
+      "var": "lnkappa:-lndelta",
+      "selection": "primary",
+      "opt": {
+        "z": [0,100],
+        "norm": true,
+        "drawopt": "colz"
+      }
+    }
+  ],
+
+  "Scale": {
+    "log": true,
+    "x_range": [0,7],
+    "y_range": [-12,0],
+    "xbins": 100,
+    "ybins": 100
+  },
+
+  "Annotation": {
+    "title": {
+      "hist": "ab",
+      "x_axis": "ab",
+      "y_axis": "ab"
+    },
+    "legend": {
+      "style": "abc",
+      "x_pos": [1,2],
+      "y_pos": [2,3]
+    }
+  }
+
+}

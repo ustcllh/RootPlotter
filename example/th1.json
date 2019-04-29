@@ -1,0 +1,74 @@
+{
+  "Canvas": {
+    "name": "test",
+    "height": 800,
+    "width": 600,
+    "title": "canvas title",
+    "class": "TH1"
+  },
+
+  "Hist": [
+    {
+      "file": "/Users/liulihan/Documents/RootPlotter/example/data/HiForestAOD.root",
+      "tree": "akCs4PFJetAnalyzer/t",
+      "var": "jteta",
+      "selection": "",
+      "marker": {
+        "style": 1,
+        "color": 1,
+        "size": 1
+      },
+      "line": {
+        "style": 1,
+        "color": 1,
+        "width": 1
+      },
+      "opt": {
+        "norm": true,
+        "drawopt": ""
+      }
+    },
+    {
+      "file": "/Users/liulihan/Documents/RootPlotter/example/data/HiForestAOD.root",
+      "tree": "akCs4PFJetAnalyzer/t",
+      "var": "jtphi",
+      "selection": "abs(jtphi)<2",
+      "marker": {
+        "style": 2,
+        "color": 2,
+        "size": 2
+      },
+      "line": {
+        "style": 2,
+        "color": 2,
+        "width": 2
+      },
+      "opt": {
+        "norm": true,
+        "drawopt": ""
+      }
+    }
+  ],
+
+  "Scale": {
+    "log": true,
+    "x_range": [-5,5],
+    "y_range": [0,1000],
+    "xbins": 100,
+    "ybins": 100
+  },
+
+  "Annotation": {
+    "title": {
+      "hist": "ab",
+      "x_axis": "ab",
+      "y_axis": "ab"
+    },
+    "legend": {
+      "style": "abc",
+      "x_pos": [1,2],
+      "y_pos": [2,3]
+    }
+  }
+
+}
